@@ -19,6 +19,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_memory.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_debug.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_value.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_vm.c
 )
 
 # header files
@@ -28,6 +29,7 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/ergon/ergon_common.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/ergon/ergon_chunks.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/ergon/ergon_value.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/vm/ergon_vm.h
 )
 
 # external packages
