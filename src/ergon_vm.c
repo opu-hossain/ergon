@@ -2,6 +2,7 @@
 
 #include "../include/ergon/ergon_common.h"
 #include "../include/ergon/ergon_debug.h"
+#include "../include/ergon/ergon_memory.h"
 #include "../include/vm/ergon_vm.h"
 
 VM vm;
@@ -15,6 +16,16 @@ void free_vm() {
 }
 
 void push(Value value) {
+  if (vm.stack_top - vm.stack == vm.stack_capacity) {
+    int old_capacity = vm.stack_capacity;
+    int offset = vm.stack_top - vm.stack;
+
+    vm.stack_capacity = GROW_CAPACITY(old_capacity);
+    vm.stack = GROW_ARRAY(Value, vm.stack, old_capacity, vm.stack_capacity);
+
+    vm.stack_top = vm.stack + offset;
+  }
+
   *vm.stack_top = value;
   vm.stack_top++;
 }

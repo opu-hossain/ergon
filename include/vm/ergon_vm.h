@@ -4,12 +4,11 @@
 #include "../ergon/ergon_chunks.h"
 #include "../ergon/ergon_value.h"
 
-#define STACK_MAX 256
-
 typedef struct {
   Chunk *chunk;
   uint8_t *ip;
-  Value stack[STACK_MAX];
+  Value *stack;
+  int stack_capacity;
   Value *stack_top;
 } VM;
 
