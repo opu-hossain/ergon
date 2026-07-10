@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../include/ergon/chunk.h"
-#include "../include/ergon/memory.h"
+#include "ergon/chunk.h"
+#include "ergon/memory.h"
 
 void init_chunk(Chunk *chunk) {
   chunk->count = 0;

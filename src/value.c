@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "../include/ergon/memory.h"
-#include "../include/ergon/value.h"
+#include "ergon/memory.h"
+#include "ergon/value.h"
 
 void init_value_array(value_array *array) {
   array->values = NULL;

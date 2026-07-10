@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../include/ergon/common.h"
-#include "../include/ergon/scanner.h"
+#include "ergon/common.h"
+#include "ergon/scanner.h"
 
 typedef struct {
   const char *start;

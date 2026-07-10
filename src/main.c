@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../include/ergon/chunk.h"
-#include "../include/ergon/common.h"
-#include "../include/ergon/debug.h"
-#include "../include/ergon/vm.h"
+#include "ergon/chunk.h"
+#include "ergon/common.h"
+#include "ergon/debug.h"
+#include "ergon/vm.h"
 
 static void repl() {
   char line[1024];

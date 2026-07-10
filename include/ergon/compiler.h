@@ -1,6 +1,7 @@
 #ifndef ergon_compiler_h
 #define ergon_compiler_h
 
-void compile(const char *source);
+#include "ergon/chunk.h"
+bool compile(const char *source, Chunk *chunk);
 
 #endif // !DEBUG ergon_compiler_h
