@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "../include/compiler/ergon_compiler.h"
 #include "../include/ergon/ergon_common.h"
 #include "../include/ergon/ergon_debug.h"
 #include "../include/ergon/ergon_memory.h"
@@ -90,8 +91,7 @@ static interpret_result run() {
 #undef BINARY_OP
 }
 
-interpret_result interpret(Chunk *chunk) {
-  vm.chunk = chunk;
-  vm.ip = vm.chunk->code;
-  return run();
+interpret_result interpret(const char *source) {
+  compile(source);
+  return INTERPRET_OK;
 }

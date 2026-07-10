@@ -20,6 +20,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_debug.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_value.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_vm.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_compiler.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_scanner.c
 )
 
 # header files
@@ -30,6 +32,8 @@ set(HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/ergon/ergon_chunks.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/ergon/ergon_value.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/vm/ergon_vm.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/compiler/ergon_compiler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/scanner/ergon_scanner.h
 )
 
 # external packages
