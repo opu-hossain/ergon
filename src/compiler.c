@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include "../include/compiler/ergon_compiler.h"
-#include "../include/ergon/ergon_common.h"
-#include "../include/scanner/ergon_scanner.h"
+#include "../include/ergon/common.h"
+#include "../include/ergon/compiler.h"
+#include "../include/ergon/scanner.h"
 
 void compile(const char *source) {
   init_scanner(source);

@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include "../include/ergon/ergon_chunks.h"
-#include "../include/ergon/ergon_debug.h"
-#include "../include/ergon/ergon_value.h"
+#include "../include/ergon/chunk.h"
+#include "../include/ergon/debug.h"
+#include "../include/ergon/value.h"
 
 void disassemble_chunk(Chunk *chunk, const char *name) {
   printf("== %s ==\n", name);

@@ -11,42 +11,25 @@ project(Ergon
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # source files
 set(SOURCES 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_chunks.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_memory.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_debug.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_value.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_vm.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_compiler.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ergon_scanner.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/chunk.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/memory.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/debug.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/value.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/vm.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/compiler.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/scanner.c
 )
-
-# header files
-set(HEADERS 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ergon/ergon_memory.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ergon/ergon_debug.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ergon/ergon_common.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ergon/ergon_chunks.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ergon/ergon_value.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/vm/ergon_vm.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/compiler/ergon_compiler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/scanner/ergon_scanner.h
-)
-
-# external packages
-#find_package(OpenSSL REQUIRED)
 
 # sources / executables
-add_executable(ergon ${SOURCES} ${HEADERS})
+add_executable(ergon ${SOURCES})
 
 # include header files
 target_include_directories(ergon PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# link libraries
-#target_link_libraries(truthbyte PRIVATE OpenSSL::Crypto)
 
 # compiler warnings
 # if(MSVC)

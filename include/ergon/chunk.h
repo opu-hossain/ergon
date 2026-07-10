@@ -1,8 +1,8 @@
-#ifndef ergon_chunks_h
-#define ergon_chunks_h
+#ifndef ergon_chunk_h
+#define ergon_chunk_h
 
-#include "ergon_common.h"
-#include "ergon_value.h"
+#include "common.h"
+#include "value.h"
 
 typedef enum {
   OP_CONSTANT,

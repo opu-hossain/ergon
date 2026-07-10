@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-#include "../include/compiler/ergon_compiler.h"
-#include "../include/ergon/ergon_common.h"
-#include "../include/ergon/ergon_debug.h"
-#include "../include/ergon/ergon_memory.h"
-#include "../include/vm/ergon_vm.h"
+#include "../include/ergon/common.h"
+#include "../include/ergon/compiler.h"
+#include "../include/ergon/debug.h"
+#include "../include/ergon/memory.h"
+#include "../include/ergon/vm.h"
 
 VM vm;
 

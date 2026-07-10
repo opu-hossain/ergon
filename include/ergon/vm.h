@@ -1,8 +1,8 @@
 #ifndef ergon_vm_h
 #define ergon_vm_h
 
-#include "../ergon/ergon_chunks.h"
-#include "../ergon/ergon_value.h"
+#include "chunk.h"
+#include "value.h"
 
 typedef struct {
   Chunk *chunk;

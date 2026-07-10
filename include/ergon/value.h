@@ -1,7 +1,7 @@
 #ifndef ergon_value_h
 #define ergon_value_h
 
-#include "ergon_common.h"
+#include "common.h"
 
 typedef double Value;
 
