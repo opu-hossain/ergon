@@ -40,9 +40,10 @@ static interpret_result run() {
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
 #define BINARY_OP(op)                                                          \
   do {                                                                         \
-    double b = pop();                                                          \
-    double a = pop();                                                          \
-    push(a op b);                                                              \
+    double b = *(vm.stack_top - 1);                                            \
+    double a = *(vm.stack_top - 2);                                            \
+    vm.stack_top--;                                                            \
+    *(vm.stack_top - 1) = a op b;                                              \
   } while (false)
   for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
@@ -75,7 +76,7 @@ static interpret_result run() {
       break;
 
     case OP_NEGATE:
-      push(-pop());
+      *(vm.stack_top - 1) = -*(vm.stack_top - 1);
       break;
     case OP_RETURN:
       print_value(pop());
