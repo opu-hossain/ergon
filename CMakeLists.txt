@@ -23,6 +23,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/vm.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/compiler.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/scanner.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/object.c
 )
 
 # sources / executables

@@ -1,13 +1,15 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
-#include "../include/ergon/common.h"
-#include "../include/ergon/compiler.h"
-#include "../include/ergon/debug.h"
-#include "../include/ergon/memory.h"
-#include "../include/ergon/vm.h"
 #include "ergon/chunk.h"
+#include "ergon/common.h"
+#include "ergon/compiler.h"
+#include "ergon/debug.h"
+#include "ergon/memory.h"
+#include "ergon/object.h"
 #include "ergon/value.h"
+#include "ergon/vm.h"
 
 VM vm;
 
@@ -27,9 +29,7 @@ static void runtime_error(const char *format, ...) {
 
 void init_vm() { reset_stack(); }
 
-void free_vm() {
-  // todo
-}
+void free_vm() { free_objects(); }
 
 void push(Value value) {
   if (vm.stack_top - vm.stack == vm.stack_capacity) {
@@ -55,6 +55,20 @@ static Value peek(int distance) { return vm.stack_top[-1 - distance]; }
 
 static bool is_falsey(Value value) {
   return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+}
+
+static void concatenate() {
+  Obj_string *a = AS_STRING(pop());
+  Obj_string *b = AS_STRING(pop());
+
+  int length = a->length + b->length;
+  char *chars = ALLOCATE(char, length + 1);
+  memcpy(chars, a->chars, a->length);
+  memcpy(chars + a->length, b->chars, b->length);
+  chars[length] = '\0';
+
+  Obj_string *result = take_string(chars, length);
+  push(OBJ_VAL(result));
 }
 
 static interpret_result run() {
@@ -121,7 +135,16 @@ static interpret_result run() {
       push(BOOL_VAL(false));
       break;
     case OP_ADD:
-      BINARY_OP(NUMBER_VAL, +);
+      if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
+        concatenate();
+      } else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1))) {
+        double b = AS_NUMBER(pop());
+        double a = AS_NUMBER(pop());
+        push(NUMBER_VAL(a + b));
+      } else {
+        runtime_error("Operands must be two numbers or two strings.");
+        return INTERPRET_RUNTIME_ERROR;
+      }
       break;
     case OP_SUBTRACT:
       BINARY_OP(NUMBER_VAL, -);

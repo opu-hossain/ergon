@@ -10,6 +10,7 @@ typedef struct {
   Value *stack;
   int stack_capacity;
   Value *stack_top;
+  Obj *objects;
 } VM;
 
 typedef enum {
@@ -17,6 +18,8 @@ typedef enum {
   INTERPRET_COMPILE_ERROR,
   INTERPRET_RUNTIME_ERROR,
 } interpret_result;
+
+extern VM vm;
 
 void init_vm();
 void free_vm();
