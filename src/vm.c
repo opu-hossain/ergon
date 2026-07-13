@@ -93,11 +93,23 @@ static interpret_result run() {
       push(BOOL_VAL(values_equal(a, b)));
       break;
     }
+    case OP_NOT_EQUAL: {
+      Value b = pop();
+      Value a = pop();
+      push(BOOL_VAL(!values_equal(a, b)));
+      break;
+    }
     case OP_GREATER:
       BINARY_OP(BOOL_VAL, >);
       break;
+    case OP_GREATER_EQUAL:
+      BINARY_OP(BOOL_VAL, >=);
+      break;
     case OP_LESS:
       BINARY_OP(BOOL_VAL, <);
+      break;
+    case OP_LESS_EQUAL:
+      BINARY_OP(BOOL_VAL, <=);
       break;
     case OP_NIL:
       push(NIL_VAL);
