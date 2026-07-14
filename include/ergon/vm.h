@@ -2,6 +2,7 @@
 #define ergon_vm_h
 
 #include "chunk.h"
+#include "table.h"
 #include "value.h"
 
 typedef struct {
@@ -10,6 +11,7 @@ typedef struct {
   Value *stack;
   int stack_capacity;
   Value *stack_top;
+  Table strings;
   Obj *objects;
 } VM;
 

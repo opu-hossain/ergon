@@ -27,9 +27,16 @@ static void runtime_error(const char *format, ...) {
   fprintf(stderr, "[line %d] in script\n]", line);
 }
 
-void init_vm() { reset_stack(); }
+void init_vm() {
+  reset_stack();
+  vm.objects = NULL;
+  init_table(&vm.strings);
+}
 
-void free_vm() { free_objects(); }
+void free_vm() {
+  free_table(&vm.strings);
+  free_objects();
+}
 
 void push(Value value) {
   if (vm.stack_top - vm.stack == vm.stack_capacity) {
@@ -58,8 +65,8 @@ static bool is_falsey(Value value) {
 }
 
 static void concatenate() {
-  Obj_string *a = AS_STRING(pop());
   Obj_string *b = AS_STRING(pop());
+  Obj_string *a = AS_STRING(pop());
 
   int length = a->length + b->length;
   char *chars = ALLOCATE(char, length + 1);
