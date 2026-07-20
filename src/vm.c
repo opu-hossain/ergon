@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -8,10 +9,22 @@
 #include "ergon/debug.h"
 #include "ergon/memory.h"
 #include "ergon/object.h"
+#include "ergon/table.h"
 #include "ergon/value.h"
 #include "ergon/vm.h"
 
 VM vm;
+
+void write_global_array(Global_array *array, Global global) {
+  if (array->capacity < array->count + 1) {
+    int old_capacity = array->capacity;
+    array->capacity = GROW_CAPACITY(old_capacity);
+    array->globals =
+        GROW_ARRAY(Global, array->globals, old_capacity, array->capacity);
+  }
+  array->globals[array->count] = global;
+  array->count++;
+}
 
 static void reset_stack() { vm.stack_top = vm.stack; }
 
@@ -31,10 +44,17 @@ void init_vm() {
   reset_stack();
   vm.objects = NULL;
   init_table(&vm.strings);
+
+  init_table(&vm.global_names);
+  vm.global_values.count = 0;
+  vm.global_values.capacity = 0;
+  vm.global_values.globals = NULL;
 }
 
 void free_vm() {
   free_table(&vm.strings);
+  free_table(&vm.global_names);
+  FREE_ARRAY(Global, vm.global_values.globals, vm.global_values.capacity);
   free_objects();
 }
 
@@ -81,6 +101,7 @@ static void concatenate() {
 static interpret_result run() {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+#define READ_STRING() AS_STRING(READ_CONSTANT())
 #define BINARY_OP(value_type, op)                                              \
   do {                                                                         \
     if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {                          \
@@ -141,6 +162,36 @@ static interpret_result run() {
     case OP_FALSE:
       push(BOOL_VAL(false));
       break;
+    case OP_POP:
+      pop();
+      break;
+    case OP_DEFINE_GLOBAL: {
+      uint8_t slot = READ_BYTE();
+      vm.global_values.globals[slot].value = peek(0);
+      vm.global_values.globals[slot].is_defined = true;
+      pop();
+      break;
+    }
+    case OP_GET_GLOBAL: {
+      uint8_t slot = READ_BYTE();
+      Global *global = &vm.global_values.globals[slot];
+      if (!global->is_defined) {
+        runtime_error("Undefined variable '%s'.", global->name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      push(global->value);
+      break;
+    }
+    case OP_SET_GLOBAL: {
+      uint8_t slot = READ_BYTE();
+      Global *global = &vm.global_values.globals[slot];
+      if (!global->is_defined) {
+        runtime_error("Undefined variable '%s'.", global->name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      global->value = peek(0);
+      break;
+    }
     case OP_ADD:
       if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
         concatenate();
@@ -172,15 +223,19 @@ static interpret_result run() {
       }
       push(NUMBER_VAL(-AS_NUMBER(pop())));
       break;
-    case OP_RETURN:
+    case OP_PRINT:
       print_value(pop());
       printf("\n");
+      break;
+    case OP_RETURN:
+      // Exit interpreter
       return INTERPRET_OK;
     }
   }
 
 #undef READ_BYTE
 #undef READ_CONSTANT
+#undef READ_STRING
 #undef BINARY_OP
 }
 

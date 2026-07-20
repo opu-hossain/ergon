@@ -2,6 +2,7 @@
 #define ergon_vm_h
 
 #include "chunk.h"
+#include "ergon/object.h"
 #include "table.h"
 #include "value.h"
 
@@ -11,7 +12,10 @@ typedef struct {
   Value *stack;
   int stack_capacity;
   Value *stack_top;
+  Table globals;
   Table strings;
+  Table global_names;
+  Global_array global_values;
   Obj *objects;
 } VM;
 
@@ -28,5 +32,6 @@ void free_vm();
 interpret_result interpret(const char *source);
 void push(Value value);
 Value pop();
+void write_global_array(Global_array *array, Global global);
 
 #endif // !ergon_vm_h

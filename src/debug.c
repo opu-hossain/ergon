@@ -1,8 +1,10 @@
+#include <stdint.h>
 #include <stdio.h>
 
 #include "ergon/chunk.h"
 #include "ergon/debug.h"
 #include "ergon/value.h"
+#include "ergon/vm.h"
 
 void disassemble_chunk(Chunk *chunk, const char *name) {
   printf("== %s ==\n", name);
@@ -22,6 +24,12 @@ static int constant_instruction(const char *name, Chunk *chunk, int offset) {
   printf("%-16s %4d '", name, constant);
   print_value(chunk->constants.values[constant]);
   printf("'\n");
+  return offset + 2;
+}
+
+static int global_instruction(const char *name, Chunk *chunk, int offset) {
+  uint8_t slot = chunk->code[offset + 1];
+  printf("%-16s %4d '", name, slot, vm.global_values.globals[slot].name->chars);
   return offset + 2;
 }
 
@@ -47,6 +55,14 @@ int disassemble_instruction(Chunk *chunk, int offset) {
     return simple_instruction("OP_TRUE", offset);
   case OP_FALSE:
     return simple_instruction("OP_FALSE", offset);
+  case OP_POP:
+    return simple_instruction("OP_POP", offset);
+  case OP_SET_GLOBAL:
+    return global_instruction("OP_SET_GLOBAL", chunk, offset);
+  case OP_GET_GLOBAL:
+    return global_instruction("OP_GET_GLOBAL", chunk, offset);
+  case OP_DEFINE_GLOBAL:
+    return global_instruction("OP_DEFINE_GLOBAL", chunk, offset);
   case OP_EQUAL:
     return simple_instruction("OP_EQUAL", offset);
   case OP_GREATER:
@@ -67,6 +83,8 @@ int disassemble_instruction(Chunk *chunk, int offset) {
     return simple_instruction("OP_DEVIDE", offset);
   case OP_NEGATE:
     return simple_instruction("OP_NEGATE", offset);
+  case OP_PRINT:
+    return simple_instruction("OP_PRINT", offset);
   case OP_RETURN:
     return simple_instruction("OP_RETURN", offset);
   default:
