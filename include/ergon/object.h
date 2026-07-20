@@ -15,6 +15,18 @@ typedef enum {
   OBJ_STRING,
 } Obj_type;
 
+typedef struct {
+  Obj_string *name;
+  Value value;
+  bool is_defined;
+} Global;
+
+typedef struct {
+  int count;
+  int capacity;
+  Global *globals;
+} Global_array;
+
 struct Obj {
   Obj_type type;
   struct Obj *next;
