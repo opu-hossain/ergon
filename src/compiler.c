@@ -47,6 +47,7 @@ typedef struct {
 typedef struct {
   Token name;
   int depth;
+  bool is_const;
 } Local;
 
 typedef struct {
@@ -254,22 +255,29 @@ static void string(bool can_assign) {
 }
 
 static void named_variable(Token name, bool can_assign) {
-  uint8_t getOp, setOp;
+  uint8_t get_op, set_op;
   int arg = resolve_local(current, &name);
+  bool is_const;
+
   if (arg != -1) {
-    getOp = OP_GET_LOCAL;
-    setOp = OP_SET_LOCAL;
+    get_op = OP_GET_LOCAL;
+    set_op = OP_SET_LOCAL;
+    is_const = current->locals[arg].is_const;
   } else {
     arg = identifier_global(&name);
-    getOp = OP_GET_GLOBAL;
-    setOp = OP_SET_GLOBAL;
+    get_op = OP_GET_GLOBAL;
+    set_op = OP_SET_GLOBAL;
+    is_const = vm.global_values.globals[arg].is_const;
   }
 
   if (can_assign && match(TOKEN_EQUAL)) {
+    if (is_const) {
+      error("Cannot assign to a constant variable.");
+    }
     expression();
-    emit_bytes(setOp, arg);
+    emit_bytes(set_op, (uint8_t)arg);
   } else {
-    emit_bytes(getOp, arg);
+    emit_bytes(get_op, (uint8_t)arg);
   }
 }
 
@@ -419,6 +427,7 @@ static void add_local(Token name) {
   Local *local = &current->locals[current->local_count++];
   local->name = name;
   local->depth = -1;
+  local->is_const = false;
 }
 
 static void declare_varable() {
@@ -466,6 +475,21 @@ static void block() {
     declaration();
   }
   consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
+}
+
+static void const_declaration() {
+  uint8_t global = parse_variable("Expect constant name.");
+
+  consume(TOKEN_EQUAL, "Constant declaration requires an initializer.");
+  expression();
+  consume(TOKEN_SEMICOLON, "Expect ';' after constant declaration.");
+
+  if (current->scope_depth > 0) {
+    current->locals[current->local_count - 1].is_const = true;
+  } else {
+    vm.global_values.globals[global].is_const = true;
+  }
+  define_variable(global);
 }
 
 static void var_declaration() {
@@ -517,6 +541,8 @@ static void synchoronize() {
 static void declaration() {
   if (match(TOKEN_VAR)) {
     var_declaration();
+  } else if (match(TOKEN_CONST)) {
+    const_declaration();
   } else {
     statement();
   }

@@ -19,6 +19,7 @@ typedef struct {
   Obj_string *name;
   Value value;
   bool is_defined;
+  bool is_const;
 } Global;
 
 typedef struct {
