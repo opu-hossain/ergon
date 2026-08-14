@@ -1,10 +1,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "ergon/chunk.h"
-#include "ergon/debug.h"
-#include "ergon/value.h"
-#include "ergon/vm.h"
+#include "../include/ergon/chunk.h"
+#include "../include/ergon/debug.h"
+#include "../include/ergon/value.h"
+#include "../include/ergon/vm.h"
 
 void disassemble_chunk(Chunk *chunk, const char *name) {
   printf("== %s ==\n", name);

@@ -2,7 +2,7 @@
 #define ergon_vm_h
 
 #include "chunk.h"
-#include "ergon/object.h"
+#include "object.h"
 #include "table.h"
 #include "value.h"
 

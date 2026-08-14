@@ -3,16 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ergon/chunk.h"
-#include "ergon/common.h"
-#include "ergon/compiler.h"
-#include "ergon/object.h"
-#include "ergon/scanner.h"
-#include "ergon/table.h"
-#include "ergon/value.h"
+#include "../include/ergon/chunk.h"
+#include "../include/ergon/common.h"
+#include "../include/ergon/compiler.h"
+#include "../include/ergon/object.h"
+#include "../include/ergon/scanner.h"
+#include "../include/ergon/table.h"
+#include "../include/ergon/value.h"
 
 #ifdef DEBUG_PRINT_CODE
-#include "ergon/debug.h"
+#include "../include/ergon/debug.h"
 #endif
 
 typedef struct {
@@ -590,10 +590,9 @@ static void print_statement() {
 static void for_statement() {
   begin_scope();
   consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for'.");
-  consume(TOKEN_SEMICOLON, "Expect ';'.");
 
   if (match(TOKEN_SEMICOLON)) {
-    // No initializer
+    // No initializer.
   } else if (match(TOKEN_VAR)) {
     var_declaration();
   } else {
@@ -605,13 +604,9 @@ static void for_statement() {
   if (!match(TOKEN_SEMICOLON)) {
     expression();
     consume(TOKEN_SEMICOLON, "Expect ';' after loop condition.");
-
-    // Jump out of the loop if the condition is false.
     exit_jump = emit_jump(OP_JUMP_IF_FALSE);
     emit_byte(OP_POP);
   }
-  consume(TOKEN_SEMICOLON, "Expect ';'.");
-  consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
 
   if (!match(TOKEN_RIGHT_PAREN)) {
     int body_jump = emit_jump(OP_JUMP);

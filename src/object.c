@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ergon/memory.h"
-#include "ergon/object.h"
-#include "ergon/table.h"
-#include "ergon/value.h"
-#include "ergon/vm.h"
+#include "../include/ergon/memory.h"
+#include "../include/ergon/object.h"
+#include "../include/ergon/table.h"
+#include "../include/ergon/value.h"
+#include "../include/ergon/vm.h"
 
 #define ALLOCATE_OBJ(type, object_type)                                        \
   (type *)allocate_object(sizeof(type), object_type)

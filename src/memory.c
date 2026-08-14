@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "ergon/memory.h"
-#include "ergon/value.h"
-#include "ergon/vm.h"
+#include "../include/ergon/memory.h"
+#include "../include/ergon/value.h"
+#include "../include/ergon/vm.h"
 
 void *reallocate(void *pointer, size_t old_size, size_t new_size) {
   if (new_size == 0) {

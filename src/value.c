@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ergon/memory.h"
-#include "ergon/object.h"
-#include "ergon/value.h"
+#include "../include/ergon/memory.h"
+#include "../include/ergon/object.h"
+#include "../include/ergon/value.h"
 
 void init_value_array(value_array *array) {
   array->values = NULL;

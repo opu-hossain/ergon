@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ergon/common.h"
-#include "ergon/memory.h"
-#include "ergon/object.h"
-#include "ergon/table.h"
-#include "ergon/value.h"
+#include "../include/ergon/common.h"
+#include "../include/ergon/memory.h"
+#include "../include/ergon/object.h"
+#include "../include/ergon/table.h"
+#include "../include/ergon/value.h"
 
 #define TABLE_MAX_LOAD 0.75
 
