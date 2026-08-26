@@ -18,13 +18,20 @@ int main(int argc, char **argv) {
 
   Nob_Cmd cmd = {0};
 
-#if !defined(_MSC_VER)
-  nob_cmd_append(&cmd, "cc", "-I", INCLUDE_FOLDER, "-o", BUILD_FOLDER "ergon");
+#if defined(_MSC_VER)
+  nob_cmd_append(&cmd, "cl", "-I", INCLUDE_FOLDER, "/Fe:" BUILD_FOLDER "ergon");
+  for (size_t i = 0; i < NOB_ARRAY_LEN(sources); ++i) {
+    nob_cmd_append(&cmd, nob_temp_sprintf("%s%s", SRC_FOLDER, sources[i]));
+  }
+#elif defined(_WIN32)
+  // MinGW-w64 on Windows: use gcc explicitly, and add .exe to the output name
+  nob_cmd_append(&cmd, "gcc", "-I", INCLUDE_FOLDER, "-o", BUILD_FOLDER "ergon.exe");
   for (size_t i = 0; i < NOB_ARRAY_LEN(sources); ++i) {
     nob_cmd_append(&cmd, nob_temp_sprintf("%s%s", SRC_FOLDER, sources[i]));
   }
 #else
-  nob_cmd_append(&cmd, "cl", "-I", INCLUDE_FOLDER, "/Fe:" BUILD_FOLDER "ergon");
+  // Linux/macOS
+  nob_cmd_append(&cmd, "cc", "-I", INCLUDE_FOLDER, "-o", BUILD_FOLDER "ergon");
   for (size_t i = 0; i < NOB_ARRAY_LEN(sources); ++i) {
     nob_cmd_append(&cmd, nob_temp_sprintf("%s%s", SRC_FOLDER, sources[i]));
   }
