@@ -25,6 +25,15 @@ static void free_object(Obj *object) {
     reallocate(object, sizeof(Obj_string) + string->length + 1, 0);
     break;
   }
+  case OBJ_FUNCTION: {
+    Obj_function *function = (Obj_function *)object;
+    free_chunk(&function->chunk);
+    FREE(Obj_function, object);
+    break;
+  }
+  case OBJ_NATIVE:
+    FREE(Obj_native, object);
+    break;
   }
 }
 

@@ -24,13 +24,14 @@ typedef enum {
   OP_ADD,
   OP_SUBTRACT,
   OP_MULTIPLY,
-  OP_DEVIDE,
+  OP_DIVIDE,
   OP_NOT,
   OP_NEGATE,
   OP_PRINT,
   OP_JUMP,
   OP_JUMP_IF_FALSE,
   OP_LOOP,
+  OP_CALL,
   OP_RETURN,
 } OpCode;
 

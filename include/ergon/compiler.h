@@ -4,6 +4,6 @@
 #include "chunk.h"
 #include "object.h"
 #include "vm.h"
-bool compile(const char *source, Chunk *chunk);
+Obj_function *compile(const char *source);
 
 #endif // !DEBUG ergon_compiler_h
