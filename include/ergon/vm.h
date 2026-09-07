@@ -9,7 +9,7 @@
 #define FRAMES_MAX 64
 
 typedef struct {
-  Obj_function *function;
+  Obj_closure *closure;
   uint8_t *ip;
   int slots_offset;
 } Call_frame;
@@ -25,6 +25,7 @@ typedef struct {
   Table global_names;
   Global_array global_values;
   Obj *objects;
+  Obj_upvalue *open_upvalues;
 } VM;
 
 typedef enum {

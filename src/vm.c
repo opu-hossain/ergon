@@ -34,6 +34,7 @@ void write_global_array(Global_array *array, Global global) {
 static void reset_stack() {
   vm.stack_top = vm.stack;
   vm.frame_count = 0;
+  vm.open_upvalues = NULL;
 }
 
 static void runtime_error(const char *format, ...) {
@@ -45,7 +46,7 @@ static void runtime_error(const char *format, ...) {
 
   for (int i = vm.frame_count - 1; i >= 0; i--) {
     Call_frame *frame = &vm.frames[i];
-    Obj_function *function = frame->function;
+    Obj_function *function = frame->closure->function;
     size_t instruction = frame->ip - function->chunk.code - 1;
     fprintf(stderr, "[line %d] in ",
             get_line(&function->chunk, (int)instruction));
@@ -112,11 +113,23 @@ void push(Value value) {
   if (vm.stack_top - vm.stack == vm.stack_capacity) {
     int old_capacity = vm.stack_capacity;
     int offset = vm.stack_top - vm.stack;
+    Value *old_stack = vm.stack;
 
     vm.stack_capacity = GROW_CAPACITY(old_capacity);
     vm.stack = GROW_ARRAY(Value, vm.stack, old_capacity, vm.stack_capacity);
 
     vm.stack_top = vm.stack + offset;
+
+    if (vm.stack != old_stack) {
+      // printf("STACK MOVED: %p -> %p (capacity %d -> %d)\n", (void
+      // *)old_stack,
+      //        (void *)vm.stack, old_capacity, vm.stack_capacity);
+
+      for (Obj_upvalue *upvalue = vm.open_upvalues; upvalue != NULL;
+           upvalue = upvalue->next) {
+        upvalue->location = vm.stack + (upvalue->location - old_stack);
+      }
+    }
   }
 
   *vm.stack_top = value;
@@ -130,9 +143,9 @@ Value pop() {
 
 static Value peek(int distance) { return vm.stack_top[-1 - distance]; }
 
-static bool call(Obj_function *function, int arg_count) {
-  if (arg_count != function->arity) {
-    runtime_error("Expected %d arguments but got %d.", function->arity,
+static bool call(Obj_closure *closure, int arg_count) {
+  if (arg_count != closure->function->arity) {
+    runtime_error("Expected %d arguments but got %d.", closure->function->arity,
                   arg_count);
     return false;
   }
@@ -143,8 +156,8 @@ static bool call(Obj_function *function, int arg_count) {
   }
 
   Call_frame *frame = &vm.frames[vm.frame_count++];
-  frame->function = function;
-  frame->ip = function->chunk.code;
+  frame->closure = closure;
+  frame->ip = closure->function->chunk.code;
   frame->slots_offset = (int)(vm.stack_top - vm.stack) - arg_count - 1;
 
   return true;
@@ -153,8 +166,8 @@ static bool call(Obj_function *function, int arg_count) {
 static bool call_value(Value callee, int arg_count) {
   if (IS_OBJ(callee)) {
     switch (OBJ_TYPE(callee)) {
-    case OBJ_FUNCTION:
-      return call(AS_FUNCTION(callee), arg_count);
+    case OBJ_CLOSURE:
+      return call(AS_CLOSURE(callee), arg_count);
     case OBJ_NATIVE: {
       Native_fn native = AS_NATIVE(callee);
       Value result = native(arg_count, vm.stack_top - arg_count);
@@ -188,10 +201,43 @@ static void concatenate() {
   push(OBJ_VAL(result));
 }
 
+static Obj_upvalue *capture_upvalue(Value *local) {
+  Obj_upvalue *prev_upvalue = NULL;
+  Obj_upvalue *upvalue = vm.open_upvalues;
+  while (upvalue != NULL && upvalue->location > local) {
+    prev_upvalue = upvalue;
+    upvalue = upvalue->next;
+  }
+
+  if (upvalue != NULL && upvalue->location == local) {
+    return upvalue;
+  }
+  Obj_upvalue *created_upvalue = new_upvalue(local);
+  created_upvalue->next = upvalue;
+
+  if (prev_upvalue == NULL) {
+    vm.open_upvalues = created_upvalue;
+  } else {
+    prev_upvalue->next = created_upvalue;
+  }
+
+  return created_upvalue;
+}
+
+static void close_upvalues(Value *last) {
+  while (vm.open_upvalues != NULL && vm.open_upvalues->location >= last) {
+    Obj_upvalue *upvalue = vm.open_upvalues;
+    upvalue->closed = *upvalue->location;
+    upvalue->location = &upvalue->closed;
+    vm.open_upvalues = upvalue->next;
+  }
+}
+
 static interpret_result run() {
   Call_frame *frame = &vm.frames[vm.frame_count - 1];
 #define READ_BYTE() (*frame->ip++)
-#define READ_CONSTANT() (frame->function->chunk.constants.values[READ_BYTE()])
+#define READ_CONSTANT()                                                        \
+  (frame->closure->function->chunk.constants.values[READ_BYTE()])
 #define READ_SHORT()                                                           \
   (frame->ip += 2, (uint16_t)((frame->ip[-2] << 8) | frame->ip[-1]))
 #define READ_STRING() AS_STRING(READ_CONSTANT())
@@ -214,8 +260,9 @@ static interpret_result run() {
       printf(" ]");
     }
     printf("\n");
-    disassemble_instruction(&frame->function->chunk,
-                            (int)(frame->ip - frame->function->chunk.code));
+    disassemble_instruction(
+        &frame->closure->function->chunk,
+        (int)(frame->ip - frame->closure->function->chunk.code));
 #endif
     uint8_t instruction;
     switch (instruction = READ_BYTE()) {
@@ -297,6 +344,21 @@ static interpret_result run() {
       global->value = peek(0);
       break;
     }
+    case OP_GET_UPVALUE: {
+      uint8_t slot = READ_BYTE();
+      push(*frame->closure->upvalues[slot]->location);
+      break;
+    }
+    case OP_SET_UPVALUE: {
+      uint8_t slot = READ_BYTE();
+      *frame->closure->upvalues[slot]->location = peek(0);
+      break;
+    }
+    case OP_CLOSE_UPVALUE: {
+      close_upvalues(vm.stack_top - 1);
+      pop();
+      break;
+    }
     case OP_ADD:
       if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
         concatenate();
@@ -356,8 +418,26 @@ static interpret_result run() {
       frame = &vm.frames[vm.frame_count - 1];
       break;
     }
+    case OP_CLOSURE: {
+      Obj_function *function = AS_FUNCTION(READ_CONSTANT());
+      Obj_closure *closure = new_closure(function);
+      push(OBJ_VAL(closure));
+
+      for (int i = 0; i < closure->upvalue_count; i++) {
+        uint8_t is_local = READ_BYTE();
+        uint8_t index = READ_BYTE();
+        if (is_local) {
+          closure->upvalues[i] =
+              capture_upvalue(&vm.stack[frame->slots_offset + index]);
+        } else {
+          closure->upvalues[i] = frame->closure->upvalues[index];
+        }
+      }
+      break;
+    }
     case OP_RETURN: {
       Value result = pop();
+      close_upvalues(&vm.stack[frame->slots_offset]);
       vm.frame_count--;
       if (vm.frame_count == 0) {
         pop();
@@ -385,7 +465,10 @@ interpret_result interpret(const char *source) {
     return INTERPRET_COMPILE_ERROR;
 
   push(OBJ_VAL(function));
-  call(function, 0);
+  Obj_closure *closure = new_closure(function);
+  pop();
+  push(OBJ_VAL(closure));
+  call(closure, 0);
 
   return run();
 }

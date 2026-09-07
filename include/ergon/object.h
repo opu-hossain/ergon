@@ -9,16 +9,20 @@
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)
 #define IS_STRING(value) is_obj_type(value, OBJ_STRING)
 #define IS_FUNCTION(value) is_obj_type(value, OBJ_FUNCTION)
+#define IS_CLOSURE(value) is_obj_type(value, OBJ_CLOSURE)
 #define IS_NATIVE(value) is_obj_type(value, OBJ_NATIVE)
 
 #define AS_STRING(value) ((Obj_string *)AS_OBJ(value))
 #define AS_CSTRING(value) (((Obj_string *)AS_OBJ(value))->chars)
 #define AS_FUNCTION(value) ((Obj_function *)AS_OBJ(value))
+#define AS_CLOSURE(value) ((Obj_closure *)AS_OBJ(value))
 #define AS_NATIVE(value) (((Obj_native *)AS_OBJ(value))->function)
 
 typedef enum {
   OBJ_STRING,
   OBJ_FUNCTION,
+  OBJ_CLOSURE,
+  OBJ_UPVALUE,
   OBJ_NATIVE,
 } Obj_type;
 
@@ -43,6 +47,7 @@ struct Obj {
 typedef struct {
   Obj obj;
   int arity;
+  int upvalue_count;
   Chunk chunk;
   Obj_string *name;
 } Obj_function;
@@ -54,6 +59,20 @@ typedef struct {
   Native_fn function;
 } Obj_native;
 
+typedef struct Obj_upvalue {
+  Obj obj;
+  Value *location;
+  Value closed;
+  struct Obj_upvalue *next;
+} Obj_upvalue;
+
+typedef struct {
+  Obj obj;
+  Obj_function *function;
+  Obj_upvalue **upvalues;
+  int upvalue_count;
+} Obj_closure;
+
 struct Obj_string {
   Obj obj;
   int length;
@@ -62,6 +81,8 @@ struct Obj_string {
 };
 
 Obj_function *new_function();
+Obj_closure *new_closure(Obj_function *function);
+Obj_upvalue *new_upvalue(Value *slot);
 Obj_native *new_native(Native_fn function);
 Obj_string *take_string(char *chars, int length);
 Obj_string *copy_string(const char *cahrs, int length);
